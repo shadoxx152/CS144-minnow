@@ -1,0 +1,6 @@
+CompileFlags:
+  Add: [ 
+        "-Wall",
+        "-Isrc", 
+        "-Iutil"
+]
