@@ -20,4 +20,7 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
 PackConstructorInitializers: NextLine
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
 ...

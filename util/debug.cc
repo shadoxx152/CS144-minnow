@@ -6,7 +6,7 @@ using namespace std;
 
 void default_debug_handler( void* /*unused*/, std::string_view message )
 {
-  cerr << "DEBUG: " << message << "\n";
+	cerr << "DEBUG: " << message << "\n";
 }
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
@@ -16,16 +16,16 @@ static void* debug_arg = nullptr;
 
 void debug_str( string_view message )
 {
-  debug_handler( debug_arg, message );
+	debug_handler( debug_arg, message );
 }
 
 void set_debug_handler( decltype( debug_handler ) handler, void* arg )
 {
-  debug_handler = handler;
-  debug_arg = arg;
+	debug_handler = handler;
+	debug_arg = arg;
 }
 
 void reset_debug_handler()
 {
-  debug_handler = default_debug_handler;
+	debug_handler = default_debug_handler;
 }

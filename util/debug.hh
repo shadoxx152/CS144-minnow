@@ -14,7 +14,7 @@ template<typename... Args>
 void debug( std::format_string<Args...> fmt, Args&&... args )
 {
 #ifndef NDEBUG
-  debug_str( format( fmt, std::forward<Args>( args )... ) );
+	debug_str( format( fmt, std::forward<Args>( args )... ) );
 #endif
 }
 

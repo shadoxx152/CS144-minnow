@@ -13,9 +13,9 @@
 template<class T>
 std::vector<Ref<std::string>> serialize( const T& obj )
 {
-  Serializer s;
-  obj.serialize( s );
-  return s.finish();
+	Serializer s;
+	obj.serialize( s );
+	return s.finish();
 }
 
 // Helper to parse any object (without constructing a Parser of the caller's own). Returns true if successful.
@@ -29,19 +29,19 @@ std::vector<Ref<std::string>> serialize( const T& obj )
 template<class T, typename... Targs>
 [[nodiscard]] bool parse( T& obj, auto&& buffers, Targs&&... Fargs )
 {
-  Parser p { std::forward<decltype( buffers )>( buffers ) };
-  obj.parse( p, std::forward<Targs>( Fargs )... );
-  return not p.has_error();
+	Parser p { std::forward<decltype( buffers )>( buffers ) };
+	obj.parse( p, std::forward<Targs>( Fargs )... );
+	return not p.has_error();
 }
 
 // Concatenate a sequence of buffers into one string
 std::string concat( std::ranges::range auto&& r )
 {
-  std::string ret;
-  for ( const auto& x : r ) {
-    ret.append( x );
-  }
-  return ret;
+	std::string ret;
+	for ( const auto& x : r ) {
+		ret.append( x );
+	}
+	return ret;
 }
 
 // Pretty-print a string (escaping unprintable characters, and with a maximum length)

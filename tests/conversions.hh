@@ -14,21 +14,21 @@ using std::to_string;
 template<typename T>
 std::string to_string( const std::optional<T>& v )
 {
-  if ( v.has_value() ) {
-    return "Some(" + to_string( v.value() ) + ")";
-  }
+	if ( v.has_value() ) {
+		return "Some(" + to_string( v.value() ) + ")";
+	}
 
-  return "None";
+	return "None";
 }
 
 inline std::string to_string( bool b )
 {
-  return b ? "true" : "false";
+	return b ? "true" : "false";
 }
 
 inline std::string to_string( const std::string& str )
 {
-  return pretty_print( str );
+	return pretty_print( str );
 }
 } // namespace minnow_conversions
 
@@ -38,5 +38,5 @@ concept MinnowStringable = requires( T t ) { minnow_conversions::to_string( t );
 template<MinnowStringable T>
 std::string to_string( T&& t )
 {
-  return minnow_conversions::to_string( std::forward<T>( t ) );
+	return minnow_conversions::to_string( std::forward<T>( t ) );
 }
