@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <sys/types.h>
 #include <vector>
 
 class Reader;
@@ -23,18 +24,19 @@ class ByteStream
 	bool has_error() const { return error_; }; // Has the stream had an error?
 
   protected:
-	std::vector<char> buffer;
-	uint64_t head {};		 // The index of the first byte in the buffer
-	uint64_t tail {};		 // The index of the last byte in the buffer
-	uint64_t buffer_size {}; // The number of bytes currently in the buffer
-
-	uint64_t bytes_written {}; // The number of bytes written to the stream
-	uint64_t bytes_read {};	   // The number of bytes read from the stream
-
-	uint64_t capacity_ {}; // The maximum capacity of the buffer
-
+	uint64_t capacity_;
+	bool is_closed_ {};
 	bool error_ {};
-	bool closed_ {}; // Has the stream been closed?
+
+	uint64_t bytes_pushed_ {};
+	uint64_t bytes_popped_ {};
+	uint64_t bytes_buffered_ {};
+
+	std::vector<char> buffer_ {};
+
+	uint64_t head_ {};
+	uint64_t tail_ {};
+	uint64_t size_ {};
 };
 
 class Writer : public ByteStream

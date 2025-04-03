@@ -1,101 +1,82 @@
 #include "byte_stream.hh"
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
+#include <sys/types.h>
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity )
-  : buffer( capacity )
-  , // Default initialize the vector (empty buffer)
-  head( 0 )
-  , // Initialize head to 0
-  tail( 0 )
-  , // Initialize tail to 0
-  buffer_size( 0 )
-  , // Initialize buffer_size to 0
-  bytes_written( 0 )
-  , // Initialize bytes_written to 0
-  bytes_read( 0 )
-  , // Initialize bytes_read to 0
-  capacity_( capacity )
-  , // Initialize capacity_ with the value of the constructor argument
-  error_( false )
-  ,				   // Initialize error_ to false
-  closed_( false ) // Initialize closed_ to false
-{}
+ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ), buffer_( capacity ) {}
 
 void Writer::push( string data )
 {
-	// Check if the rest of the data can fit in the buffer
-	if ( data.size() >= Writer::available_capacity() ) {
-		data.resize( Writer::available_capacity() );
+	uint64_t size_of_write = std::min( data.size(), Writer::available_capacity() );
+
+	// Split the data into two segments if it exceeds the available capacity
+	uint64_t first_segment_size = std::min( size_of_write, capacity_ - tail_ );
+	std::memcpy( buffer_.data() + tail_, data.data(), first_segment_size );
+
+	// If the data exceeds the available capacity, copy the remaining data to the beginning of the buffer
+	if ( size_of_write > first_segment_size ) {
+		uint64_t second_segment_size = size_of_write - first_segment_size;
+		std::memcpy( buffer_.data(), data.data() + first_segment_size, second_segment_size );
 	}
 
-	// Push the data to the buffer
-	for ( size_t i = 0; i < data.size(); ++i ) {
-		buffer[tail] = data[i];
-		tail = ( tail + 1 ) % capacity_;
-	}
-
-	// Update the size of the buffer
-	buffer_size += data.size();
-	// Update the number of bytes written
-	bytes_written += data.size();
+	tail_ = ( tail_ + size_of_write ) % capacity_;
+	size_ += size_of_write;
+	bytes_pushed_ += size_of_write;
 }
 
 void Writer::close()
 {
-	closed_ = true;
+	is_closed_ = true;
 }
 
 bool Writer::is_closed() const
 {
-	return closed_;
+	return is_closed_;
 }
 
 uint64_t Writer::available_capacity() const
 {
-	return capacity_ - buffer_size;
+	return capacity_ - size_;
 }
 
 uint64_t Writer::bytes_pushed() const
 {
-	return bytes_written;
+	return bytes_pushed_;
 }
 
 string_view Reader::peek() const
 {
-	// Check if the buffer is empty
-	if ( buffer_size == 0 ) {
+	if ( size_ == 0 ) {
 		return string_view();
 	}
 
-	// Create a string_view to the data in the buffer
-	const uint64_t contiguous_length = min( buffer_size, capacity_ - head );
-	return string_view( buffer.data() + head, contiguous_length );
+	uint64_t peek_size = std::min( size_, capacity_ - head_ );
+	return string_view( buffer_.data() + head_, peek_size );
 }
 
 void Reader::pop( uint64_t len )
 {
-	if ( len > buffer_size ) {
-		len = buffer_size;
-	}
+	uint64_t pop_len = std::min( len, size_ );
 
-	// Pop the data from the buffer
-	head = ( head + len ) % capacity_;
-	buffer_size -= len;
-	bytes_read += len;
+	head_ = ( head_ + pop_len ) % capacity_;
+	size_ -= pop_len;
+	bytes_popped_ += pop_len;
 }
 
 bool Reader::is_finished() const
 {
-	return closed_ && ( buffer_size == 0 );
+	return is_closed_ && size_ == 0;
 }
 
 uint64_t Reader::bytes_buffered() const
 {
-	return buffer_size;
+	return size_;
 }
 
 uint64_t Reader::bytes_popped() const
 {
-	return bytes_read;
+	return bytes_popped_;
 }
