@@ -8,6 +8,18 @@ using namespace std;
 
 ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ), buffer_( capacity ) {}
 
+/**
+ * @brief Push data into the stream.
+ *
+ * This function writes the provided data into the ByteStream. If the data size
+ * exceeds the available capacity, it will split the data into two parts:
+ * - One part will be written starting from the current `tail_` position.
+ * - The other part will be written at the beginning of the buffer if necessary.
+ *
+ * The `tail_` pointer is updated after the data is written.
+ *
+ * @param data The data to be written into the ByteStream.
+ */
 void Writer::push( string data )
 {
 	uint64_t size_of_write = std::min( data.size(), Writer::available_capacity() );
@@ -47,6 +59,15 @@ uint64_t Writer::bytes_pushed() const
 	return bytes_pushed_;
 }
 
+/**
+ * @brief Peek at the data in the Reader without removing it.
+ *
+ * This function allows the user to view (but not modify) the data in the
+ * stream starting from the `head_` position. The size of the peeked data
+ * is limited by either the available data size or the remaining capacity in the buffer.
+ *
+ * @return A string_view of the data starting from the `head_` position.
+ */
 string_view Reader::peek() const
 {
 	if ( size_ == 0 ) {
@@ -57,6 +78,15 @@ string_view Reader::peek() const
 	return string_view( buffer_.data() + head_, peek_size );
 }
 
+/**
+ * @brief Pop (remove) data from the Reader.
+ *
+ * This function removes up to `len` bytes from the stream starting from
+ * the current `head_` position. The `head_` pointer is updated accordingly,
+ * and the size of the stream is reduced.
+ *
+ * @param len The number of bytes to be removed from the stream.
+ */
 void Reader::pop( uint64_t len )
 {
 	uint64_t pop_len = std::min( len, size_ );
