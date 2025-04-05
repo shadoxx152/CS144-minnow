@@ -1,6 +1,6 @@
-/build
+build
 /.ccls-cache
-/.vscode
+.vscode
 *.swp
 /.cache
-/.clangd
+.clangd

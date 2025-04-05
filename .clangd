@@ -1,7 +1,0 @@
-CompileFlags:
-  Add: [ 
-        "-Wall",
-        "-std=c++23",
-        "-I/home/shadoxx/Projects/CS144-minnow/src", 
-        "-I/home/shadoxx/Projects/CS144-minnow/util",
-]
