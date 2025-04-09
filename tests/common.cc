@@ -1,8 +1,10 @@
 #include "common.hh"
 #include "exception.hh"
+#include "helpers.hh"
 
 #include <csignal>
 #include <iostream>
+#include <sstream>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -71,6 +73,27 @@ string Printer::with_color( int color_value, string_view str ) const
 	return ret;
 }
 
+string to_string( const TCPSenderMessage& msg )
+{
+  ostringstream o;
+  o << "(";
+  o << "seqno=" << msg.seqno;
+  if ( msg.SYN ) {
+    o << " +SYN";
+  }
+  if ( not msg.payload.empty() ) {
+    o << " payload=\"" << pretty_print( msg.payload ) << "\"";
+  }
+  if ( msg.FIN ) {
+    o << " +FIN";
+  }
+  if ( msg.RST ) {
+    o << " +RST";
+  }
+  o << ")";
+  return o.str();
+}
+
 Timeout::Timer::Timer()
 {
 	static constexpr itimerval deadline { .it_interval = { 0, 0 }, .it_value = { 2, 0 } };
@@ -79,8 +102,17 @@ Timeout::Timer::Timer()
 
 Timeout::Timer::~Timer()
 {
+<<<<<<< HEAD
 	static constexpr itimerval disable { .it_interval = { 0, 0 }, .it_value = { 0, 0 } };
 	CheckSystemCall( "setitimer", setitimer( ITIMER_PROF, &disable, nullptr ) );
+=======
+  static constexpr itimerval disable { .it_interval = { 0, 0 }, .it_value = { 0, 0 } };
+  try {
+    CheckSystemCall( "setitimer", setitimer( ITIMER_PROF, &disable, nullptr ) );
+  } catch ( const exception& e ) {
+    cerr << "Exception:" << e.what() << "\n";
+  }
+>>>>>>> origin/check2-startercode
 }
 
 void throw_timeout( int signal_number )
@@ -102,7 +134,15 @@ Timeout::Timeout()
 
 Timeout::~Timeout()
 {
+<<<<<<< HEAD
 	CheckSystemCall( "sigaction", sigaction( SIGPROF, nullptr, nullptr ) );
+=======
+  try {
+    CheckSystemCall( "sigaction", sigaction( SIGPROF, nullptr, nullptr ) );
+  } catch ( const exception& e ) {
+    cerr << "Exception: " << e.what() << "\n";
+  }
+>>>>>>> origin/check2-startercode
 }
 
 Timeout::Timer Timeout::make_timer() // NOLINT(readability-convert-member-functions-to-static)

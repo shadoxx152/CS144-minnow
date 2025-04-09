@@ -3,6 +3,7 @@
 #include "conversions.hh"
 #include "debug.hh"
 #include "exception.hh"
+#include "tcp_sender_message.hh"
 
 #include <iostream>
 #include <optional>
@@ -17,11 +18,19 @@ class ExpectationViolation : public std::runtime_error
   public:
 	explicit ExpectationViolation( const std::string& msg ) : std::runtime_error( msg ) {}
 
+<<<<<<< HEAD
 	template<typename T>
 	inline ExpectationViolation( const std::string& property_name, const T& expected, const T& actual )
 	  : ExpectationViolation { "should have had " + property_name + " = " + to_string( expected )
 							   + ", but instead it was " + to_string( actual ) }
 	{}
+=======
+  template<typename T>
+  ExpectationViolation( const std::string& property_name, const T& expected, const T& actual )
+    : ExpectationViolation { "should have had " + property_name + " = " + to_string( expected )
+                             + ", but instead it was " + to_string( actual ) }
+  {}
+>>>>>>> origin/check2-startercode
 };
 
 template<class T>
@@ -77,10 +86,32 @@ class Timeout
 	};
 
   public:
+<<<<<<< HEAD
 	Timeout();
 	~Timeout();
 
 	Timer make_timer();
+=======
+    Timer();
+    ~Timer();
+
+    Timer( const Timer& other ) = delete;
+    Timer( Timer&& other ) = delete;
+    Timer& operator=( const Timer& other ) = delete;
+    Timer& operator=( Timer&& other ) = delete;
+  };
+
+public:
+  Timeout();
+  ~Timeout();
+
+  Timeout( const Timeout& other ) = delete;
+  Timeout( Timeout&& other ) = delete;
+  Timeout& operator=( const Timeout& other ) = delete;
+  Timeout& operator=( Timeout&& other ) = delete;
+
+  Timer make_timer();
+>>>>>>> origin/check2-startercode
 };
 
 class TestException : public std::runtime_error
@@ -121,11 +152,22 @@ class TestHarness
 
 	T obj_;
 
+<<<<<<< HEAD
 	void finish_step( const std::string& str, int color )
 	{
 		steps_executed_.value().emplace_back( str, color, std::move( debug_output_ ) );
 		debug_output_.clear();
 	}
+=======
+  void finish_step( const std::string& str, int color )
+  {
+    if ( not steps_executed_ ) {
+      throw std::runtime_error( "TestHarness in invalid state" );
+    }
+    steps_executed_.value().emplace_back( str, color, std::move( debug_output_ ) );
+    debug_output_.clear();
+  }
+>>>>>>> origin/check2-startercode
 
   protected:
 	explicit TestHarness( std::string test_name, std::string_view desc, T&& object )
@@ -236,3 +278,5 @@ struct ExpectBool : public ExpectNumber<T, bool>
 {
 	using ExpectNumber<T, bool>::ExpectNumber;
 };
+
+std::string to_string( const TCPSenderMessage& msg );
