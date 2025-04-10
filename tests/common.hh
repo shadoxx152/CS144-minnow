@@ -25,11 +25,11 @@ class ExpectationViolation : public std::runtime_error
 							   + ", but instead it was " + to_string( actual ) }
 	{}
 =======
-  template<typename T>
-  ExpectationViolation( const std::string& property_name, const T& expected, const T& actual )
-    : ExpectationViolation { "should have had " + property_name + " = " + to_string( expected )
-                             + ", but instead it was " + to_string( actual ) }
-  {}
+	template<typename T>
+	ExpectationViolation( const std::string& property_name, const T& expected, const T& actual )
+	  : ExpectationViolation { "should have had " + property_name + " = " + to_string( expected )
+							   + ", but instead it was " + to_string( actual ) }
+	{}
 >>>>>>> origin/check2-startercode
 };
 
@@ -92,25 +92,25 @@ class Timeout
 
 	Timer make_timer();
 =======
-    Timer();
-    ~Timer();
+	Timer();
+	~Timer();
 
-    Timer( const Timer& other ) = delete;
-    Timer( Timer&& other ) = delete;
-    Timer& operator=( const Timer& other ) = delete;
-    Timer& operator=( Timer&& other ) = delete;
-  };
+	Timer( const Timer& other ) = delete;
+	Timer( Timer&& other ) = delete;
+	Timer& operator=( const Timer& other ) = delete;
+	Timer& operator=( Timer&& other ) = delete;
+};
 
 public:
-  Timeout();
-  ~Timeout();
+Timeout();
+~Timeout();
 
-  Timeout( const Timeout& other ) = delete;
-  Timeout( Timeout&& other ) = delete;
-  Timeout& operator=( const Timeout& other ) = delete;
-  Timeout& operator=( Timeout&& other ) = delete;
+Timeout( const Timeout& other ) = delete;
+Timeout( Timeout&& other ) = delete;
+Timeout& operator=( const Timeout& other ) = delete;
+Timeout& operator=( Timeout&& other ) = delete;
 
-  Timer make_timer();
+Timer make_timer();
 >>>>>>> origin/check2-startercode
 };
 
@@ -159,14 +159,14 @@ class TestHarness
 		debug_output_.clear();
 	}
 =======
-  void finish_step( const std::string& str, int color )
-  {
-    if ( not steps_executed_ ) {
-      throw std::runtime_error( "TestHarness in invalid state" );
-    }
-    steps_executed_.value().emplace_back( str, color, std::move( debug_output_ ) );
-    debug_output_.clear();
-  }
+	void finish_step( const std::string& str, int color )
+	{
+		if ( not steps_executed_ ) {
+			throw std::runtime_error( "TestHarness in invalid state" );
+		}
+		steps_executed_.value().emplace_back( str, color, std::move( debug_output_ ) );
+		debug_output_.clear();
+	}
 >>>>>>> origin/check2-startercode
 
   protected:

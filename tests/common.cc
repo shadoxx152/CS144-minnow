@@ -75,23 +75,23 @@ string Printer::with_color( int color_value, string_view str ) const
 
 string to_string( const TCPSenderMessage& msg )
 {
-  ostringstream o;
-  o << "(";
-  o << "seqno=" << msg.seqno;
-  if ( msg.SYN ) {
-    o << " +SYN";
-  }
-  if ( not msg.payload.empty() ) {
-    o << " payload=\"" << pretty_print( msg.payload ) << "\"";
-  }
-  if ( msg.FIN ) {
-    o << " +FIN";
-  }
-  if ( msg.RST ) {
-    o << " +RST";
-  }
-  o << ")";
-  return o.str();
+	ostringstream o;
+	o << "(";
+	o << "seqno=" << msg.seqno;
+	if ( msg.SYN ) {
+		o << " +SYN";
+	}
+	if ( not msg.payload.empty() ) {
+		o << " payload=\"" << pretty_print( msg.payload ) << "\"";
+	}
+	if ( msg.FIN ) {
+		o << " +FIN";
+	}
+	if ( msg.RST ) {
+		o << " +RST";
+	}
+	o << ")";
+	return o.str();
 }
 
 Timeout::Timer::Timer()
@@ -106,12 +106,12 @@ Timeout::Timer::~Timer()
 	static constexpr itimerval disable { .it_interval = { 0, 0 }, .it_value = { 0, 0 } };
 	CheckSystemCall( "setitimer", setitimer( ITIMER_PROF, &disable, nullptr ) );
 =======
-  static constexpr itimerval disable { .it_interval = { 0, 0 }, .it_value = { 0, 0 } };
-  try {
-    CheckSystemCall( "setitimer", setitimer( ITIMER_PROF, &disable, nullptr ) );
-  } catch ( const exception& e ) {
-    cerr << "Exception:" << e.what() << "\n";
-  }
+	static constexpr itimerval disable { .it_interval = { 0, 0 }, .it_value = { 0, 0 } };
+	try {
+		CheckSystemCall( "setitimer", setitimer( ITIMER_PROF, &disable, nullptr ) );
+	} catch ( const exception& e ) {
+		cerr << "Exception:" << e.what() << "\n";
+	}
 >>>>>>> origin/check2-startercode
 }
 
@@ -126,8 +126,7 @@ void throw_timeout( int signal_number )
 
 Timeout::Timeout()
 {
-	struct sigaction action
-	{};
+	struct sigaction action {};
 	action.sa_handler = throw_timeout;
 	CheckSystemCall( "sigaction", sigaction( SIGPROF, &action, nullptr ) );
 }
@@ -137,11 +136,11 @@ Timeout::~Timeout()
 <<<<<<< HEAD
 	CheckSystemCall( "sigaction", sigaction( SIGPROF, nullptr, nullptr ) );
 =======
-  try {
-    CheckSystemCall( "sigaction", sigaction( SIGPROF, nullptr, nullptr ) );
-  } catch ( const exception& e ) {
-    cerr << "Exception: " << e.what() << "\n";
-  }
+	try {
+		CheckSystemCall( "sigaction", sigaction( SIGPROF, nullptr, nullptr ) );
+	} catch ( const exception& e ) {
+		cerr << "Exception: " << e.what() << "\n";
+	}
 >>>>>>> origin/check2-startercode
 }
 
