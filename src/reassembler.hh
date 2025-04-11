@@ -45,6 +45,8 @@ class Reassembler
 	// Access output stream writer, but const-only (can't write from outside)
 	const Writer& writer() const { return output_.writer(); }
 
+	void set_error() { return output_.set_error(); }
+
   private:
 	ByteStream output_;
 	std::map<uint64_t, std::pair<std::string, bool>> buffered_data_;

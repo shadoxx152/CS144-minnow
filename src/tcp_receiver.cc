@@ -1,40 +1,55 @@
 #include "tcp_receiver.hh"
-#include "debug.hh"
 #include "tcp_receiver_message.hh"
 #include "wrapping_integers.hh"
+#include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <sys/types.h>
 
 using namespace std;
 
 void TCPReceiver::receive( TCPSenderMessage message )
 {
-	/*if ( message.RST ) {*/
-	/*	reassembler_.output_.set_error();*/
-	/*	return;*/
-	/*}*/
+	if ( message.RST ) {
+		reassembler_.set_error();
+		return;
+	}
 
 	if ( message.SYN && !ISN_.has_value() ) {
 		ISN_ = message.seqno;
+		FIN_ = false;
+	}
+
+	if ( message.FIN ) {
+		FIN_ = true;
 	}
 
 	if ( !ISN_.has_value() ) {
 		return;
 	}
 
-	uint64_t unwraped_seqno = ISN_->unwrap( *ISN_, checkpoint_ );
+	/*debug( "reassembler_.writer().bytes_pushed()={}\n,reassembler_.get_FIN={}\n,reassembler_.get_SYN={}\n,
+	 * ISN_={}",*/
+	/*	   reassembler_.writer().bytes_pushed(),*/
+	/*	   reassembler_.get_FIN(),*/
+	/*	   reassembler_.get_SYN(),*/
+	/*	   ISN_->raw_value() );*/
+	/*uint64_t first_index = ISN_->unwrap(*/
+	/*  *ISN_, reassembler_.writer().bytes_pushed() + reassembler_.get_FIN() + reassembler_.get_SYN() );*/
+	/**/
+	/*reassembler_.insert( first_index, message.payload, message.FIN );*/
+	uint64_t abs_seqno = message.seqno.unwrap( *ISN_, checkpoint_ );
 
-	uint64_t stream_index = unwraped_seqno + ( message.SYN ? 1 : 0 );
+	uint64_t stream_index;
+
+	if ( message.SYN ) {
+		stream_index = 0;
+	} else {
+		stream_index = abs_seqno - 1;
+	}
 
 	reassembler_.insert( stream_index, message.payload, message.FIN );
-
-	if ( message.sequence_length() > 0 ) {
-		checkpoint_ = unwraped_seqno + message.sequence_length() - 1;
-	}
-
-	if ( message.FIN ) {
-		FIN_ = true;
-	}
+	checkpoint_ = abs_seqno + message.payload.size();
 }
 
 TCPReceiverMessage TCPReceiver::send() const
@@ -53,6 +68,7 @@ TCPReceiverMessage TCPReceiver::send() const
 		message.ackno = Wrap32::wrap( ackno, *ISN_ );
 	}
 
-	message.window_size = reassembler_.writer().available_capacity();
+	message.window_size = std::min( reassembler_.writer().available_capacity(),
+									static_cast<uint64_t>( std::numeric_limits<uint16_t>::max() ) );
 	return message;
 }
