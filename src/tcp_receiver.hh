@@ -3,6 +3,9 @@
 #include "reassembler.hh"
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
+#include "wrapping_integers.hh"
+#include <optional>
+#include <sys/types.h>
 
 class TCPReceiver
 {
@@ -27,4 +30,8 @@ class TCPReceiver
 
   private:
 	Reassembler reassembler_;
+
+	std::optional<Wrap32> ISN_ {};
+	uint64_t checkpoint_ {};
+	bool FIN_ {};
 };
