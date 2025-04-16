@@ -9,8 +9,8 @@
 //! \brief A converter from TCP segments to serialized IPv4 datagrams
 class TCPOverIPv4Adapter : public FdAdapterBase
 {
-public:
-  std::optional<TCPMessage> unwrap_tcp_in_ip( InternetDatagram ip_dgram );
+  public:
+	std::optional<TCPMessage> unwrap_tcp_in_ip( InternetDatagram ip_dgram );
 
-  InternetDatagram wrap_tcp_in_ip( const TCPMessage& msg );
+	InternetDatagram wrap_tcp_in_ip( const TCPMessage& msg );
 };
