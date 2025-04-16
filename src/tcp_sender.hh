@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <ctime>
 #include <functional>
+#include <map>
 
 class TCPSenderTimer
 {
@@ -15,13 +16,17 @@ class TCPSenderTimer
 
 	void start()
 	{
-		current_RTO_ms_ = inital_RTO_ms_;
 		is_running_ = true;
+		accumulation_time_ = 0;
 	}
 
 	void stop() { is_running_ = false; };
 
-	void reset() { accumulation_time_ = 0; }
+	void reset()
+	{
+		current_RTO_ms_ = inital_RTO_ms_;
+		accumulation_time_ = 0;
+	}
 
 	void double_RTO() { current_RTO_ms_ *= 2; }
 
@@ -80,5 +85,14 @@ class TCPSender
 	Wrap32 isn_;
 	uint64_t initial_RTO_ms_;
 
+	std::map<uint64_t, TCPSenderMessage> outstanding_ {};
+
 	TCPSenderTimer tcp_sender_timer_;
+	uint64_t retran_cnt_ {};
+
+	uint16_t sender_window_size_ = 1;
+	uint16_t receiver_window_size_ = 1;
+
+	uint64_t last_ack_ {};
+	uint64_t last_seq_ {};
 };

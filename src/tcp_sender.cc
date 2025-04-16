@@ -1,6 +1,7 @@
 #include "tcp_sender.hh"
 #include "debug.hh"
 #include "tcp_config.hh"
+#include <cstdint>
 
 using namespace std;
 
@@ -32,8 +33,18 @@ TCPSenderMessage TCPSender::make_empty_message() const
 
 void TCPSender::receive( const TCPReceiverMessage& msg )
 {
-	debug( "unimplemented receive() called" );
-	(void)msg;
+	if ( msg.RST ) {
+		input_.set_error();
+	}
+
+	uint64_t unwrap_ackno = msg.ackno->unwrap( isn_, last_ack_ );
+	receiver_window_size_ = msg.window_size;
+
+	if ( unwrap_ackno > last_seq_ ) {
+		return;
+	}
+
+	if ( unwrap_ackno )
 }
 
 void TCPSender::tick( uint64_t ms_since_last_tick, const TransmitFunction& transmit )
@@ -47,5 +58,13 @@ void TCPSender::tick( uint64_t ms_since_last_tick, const TransmitFunction& trans
 
 	tcp_sender_timer_.time_acumulatetive( ms_since_last_tick );
 
-	if ( tcp_sender_timer_.is_expire ) {}
+	if ( tcp_sender_timer_.is_expire() && !outstanding_.empty() ) {
+		transmit( outstanding_.begin()->second );
+
+		if ( receiver_window_size_ != 0 ) {
+			++retran_cnt_;
+			tcp_sender_timer_.double_RTO();
+		}
+		tcp_sender_timer_.start();
+	}
 }
