@@ -38,6 +38,14 @@ void TCPSender::receive( const TCPReceiverMessage& msg )
 
 void TCPSender::tick( uint64_t ms_since_last_tick, const TransmitFunction& transmit )
 {
-	debug( "unimplemented tick({}, ...) called", ms_since_last_tick );
-	(void)transmit;
+	/*debug( "unimplemented tick({}, ...) called", ms_since_last_tick );*/
+	/*(void)transmit;*/
+
+	if ( !tcp_sender_timer_.is_running() ) {
+		return;
+	}
+
+	tcp_sender_timer_.time_acumulatetive( ms_since_last_tick );
+
+	if ( tcp_sender_timer_.is_expire ) {}
 }

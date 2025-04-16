@@ -5,39 +5,49 @@
 #include "tcp_sender_message.hh"
 
 #include <cstdint>
+#include <ctime>
 #include <functional>
 
-class Timer
+class TCPSenderTimer
 {
   public:
-	Timer( uint64_t inital_RTO_ms ) : inital_RTO_ms_( inital_RTO_ms ) {}
+	explicit TCPSenderTimer( uint64_t inital_RTO_ms ) : inital_RTO_ms_( inital_RTO_ms ) {}
 
 	void start()
 	{
 		current_RTO_ms_ = inital_RTO_ms_;
-		is_running = true;
+		is_running_ = true;
 	}
 
-	void stop()
-	{
-		current_RTO_ms_ = 0;
-		is_running = false;
-	};
+	void stop() { is_running_ = false; };
+
+	void reset() { accumulation_time_ = 0; }
+
+	void double_RTO() { current_RTO_ms_ *= 2; }
+
+	void time_acumulatetive( uint64_t ms_since_last_tick ) { accumulation_time_ += ms_since_last_tick; }
+
+	bool is_expire() { return !is_running_ && accumulation_time_ >= current_RTO_ms_; }
+
+	bool is_running() { return is_running_; }
 
   private:
 	uint64_t inital_RTO_ms_;
-	uint64_t current_RTO_ms_ {};
-	uint64_t cumulatetive_time {};
+	uint64_t current_RTO_ms_;
+	uint64_t accumulation_time_ {};
 
-	bool is_running {};
-}
+	bool is_running_ {};
+};
 
 class TCPSender
 {
   public:
 	/* Construct TCP sender with given default Retransmission Timeout and possible ISN */
 	TCPSender( ByteStream&& input, Wrap32 isn, uint64_t initial_RTO_ms )
-	  : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms )
+	  : input_( std::move( input ) )
+	  , isn_( isn )
+	  , initial_RTO_ms_( initial_RTO_ms )
+	  , tcp_sender_timer_( initial_RTO_ms )
 	{}
 
 	/* Generate an empty TCPSenderMessage */
@@ -69,4 +79,6 @@ class TCPSender
 	ByteStream input_;
 	Wrap32 isn_;
 	uint64_t initial_RTO_ms_;
+
+	TCPSenderTimer tcp_sender_timer_;
 };
