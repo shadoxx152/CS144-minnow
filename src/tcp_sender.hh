@@ -4,7 +4,33 @@
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
 
+#include <cstdint>
 #include <functional>
+
+class Timer
+{
+  public:
+	Timer( uint64_t inital_RTO_ms ) : inital_RTO_ms_( inital_RTO_ms ) {}
+
+	void start()
+	{
+		current_RTO_ms_ = inital_RTO_ms_;
+		is_running = true;
+	}
+
+	void stop()
+	{
+		current_RTO_ms_ = 0;
+		is_running = false;
+	};
+
+  private:
+	uint64_t inital_RTO_ms_;
+	uint64_t current_RTO_ms_ {};
+	uint64_t cumulatetive_time {};
+
+	bool is_running {};
+}
 
 class TCPSender
 {
