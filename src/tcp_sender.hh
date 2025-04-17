@@ -8,11 +8,14 @@
 #include <ctime>
 #include <functional>
 #include <map>
+#include <sys/types.h>
 
 class TCPSenderTimer
 {
   public:
-	explicit TCPSenderTimer( uint64_t inital_RTO_ms ) : inital_RTO_ms_( inital_RTO_ms ) {}
+	explicit TCPSenderTimer( uint64_t inital_RTO_ms )
+	  : inital_RTO_ms_( inital_RTO_ms ), current_RTO_ms_( inital_RTO_ms )
+	{}
 
 	void start()
 	{
@@ -90,9 +93,25 @@ class TCPSender
 	TCPSenderTimer tcp_sender_timer_;
 	uint64_t retran_cnt_ {};
 
-	uint16_t sender_window_size_ = 1;
-	uint16_t receiver_window_size_ = 1;
+	uint64_t receiver_window_size_ = 1;
 
 	uint64_t last_ack_ {};
 	uint64_t last_seq_ {};
+
+	bool SYN_ {};
+	bool FIN_ {};
+
+	uint64_t sender_window_size() const
+	{
+		if ( receiver_window_size_ == 0 ) {
+			return last_seq_ < last_ack_ + 1 ? 1 : 0;
+		}
+
+		return ( last_ack_ + receiver_window_size_ > last_seq_ ) ? ( last_ack_ + receiver_window_size_ - last_seq_ )
+																 : 0;
+	}
+	uint64_t sender_window_right_edge() const
+	{
+		return last_ack_ + ( receiver_window_size_ == 0 ? 1 : receiver_window_size_ );
+	}
 };

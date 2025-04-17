@@ -3,10 +3,7 @@
 #include "tcp_config.hh"
 #include "tcp_sender_message.hh"
 #include "wrapping_integers.hh"
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <spanstream>
 
 using namespace std;
 
@@ -41,46 +38,12 @@ void TCPSender::push( const TransmitFunction& transmit )
 		syn_msg.seqno = Wrap32::wrap( last_seq_, isn_ );
 
 		transmit( syn_msg );
-
 		outstanding_[last_seq_] = syn_msg;
 		last_seq_ += 1;
 		SYN_ = true;
-
-		if ( !tcp_sender_timer_.is_running() ) {
-			tcp_sender_timer_.start();
-		}
-		return;
 	}
 
-	while ( last_seq_ < sender_window_right_edge() ) {
-		TCPSenderMessage msg;
-		msg.seqno = Wrap32::wrap( last_seq_, isn_ );
-
-		uint64_t space = std::min( sender_window_size(), TCPConfig::MAX_PAYLOAD_SIZE );
-
-		msg.payload = reader().peek().substr( 0, space );
-
-		bool is_fin
-		  = writer().is_closed() && !FIN_ && ( last_seq_ + msg.sequence_length() < sender_window_right_edge() );
-
-		if ( is_fin ) {
-			msg.FIN = true;
-			FIN_ = true;
-		}
-
-		if ( msg.sequence_length() == 0 ) {
-			break;
-		}
-
-		transmit( msg );
-
-		outstanding_[last_seq_] = msg;
-		last_seq_ += msg.sequence_length();
-
-		if ( !tcp_sender_timer_.is_running() ) {
-			tcp_sender_timer_.start();
-		}
-	}
+	uint64_t send_window = static_cast<uint64_t>( receiver_window_size_ == 0 ? 1 : receiver_window_size_ );
 }
 
 TCPSenderMessage TCPSender::make_empty_message() const
