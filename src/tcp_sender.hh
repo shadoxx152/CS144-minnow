@@ -55,7 +55,7 @@ class TCPSender
 	  : input_( std::move( input ) )
 	  , isn_( isn )
 	  , initial_RTO_ms_( initial_RTO_ms )
-	  , tcp_sender_timer_( initial_RTO_ms )
+	  , tcp_sender_timer_( initial_RTO_ms_ )
 	{}
 
 	/* Generate an empty TCPSenderMessage */
